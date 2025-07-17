@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo | MK Motos</title>
+  <link rel="stylesheet" href="estilos/estilos.css">
+  <script src="categorias.js"></script>
+  <script src="proveedores.js"></script>
+  <script src="marcas.js"></script>
+  <script src="catalogo_productos.js"></script>
+  <style>
+    .main-content { padding:2.5rem 2rem; }
+    .sidebar { min-height:100vh; }
+    .sidebar ul { list-style:none; padding:0; margin:0; }
+    .sidebar li, .sidebar a {
+      display: block;
+      cursor: pointer;
+      padding: 1rem 2rem;
+      color: #fff;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: background 0.2s;
+    }
+    .sidebar a.active, .sidebar li.active, .sidebar li:hover, .sidebar a:hover {
+      background: #303030;
+      color: #FFD700;
+      border-left: 4px solid #FFD700;
+    }
+    .input-group { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;}
+    .input-group select, .input-group input { padding:.45rem .8rem; border-radius:6px; border:1px solid #ccc;}
+    .input-group button { background:#FFD700; border:none; padding:.5rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:600;}
+    .btn-mini { font-size: .98rem; padding: .2rem .8rem; border-radius: 4px; background:#FFD700; color:#222; border:none;}
+    table { border-collapse: collapse; width: 100%; font-size: 0.98rem; background: #fff; box-shadow:0 2px 10px #0001;}
+    th, td { padding: 0.45rem 0.7rem; border-bottom:1px solid #e7e7e7; text-align:center; }
+    th { background: #ffd70022; }
+    img { max-width:40px; border-radius:5px;}
+    .stock-rojo { background:#d9534f; color:#fff; border-radius: 5px; padding:.2rem .7rem;}
+    .stock-naranja { background:#ffb347; color:#fff; border-radius: 5px; padding:.2rem .7rem;}
+    .stock-verde { background:#8fc869; color:#fff; border-radius: 5px; padding:.2rem .7rem;}
+  </style>
+</head>
+<body>
+  <div style="display:flex;min-height:100vh;">
+    <nav class="sidebar" style="background:#111;">
+      <h1 style="color:#FFD700;text-align:center;margin:2rem 0;">MK Motos</h1>
+      <ul>
+        <li><a href="admin-inicio.html">Inicio</a></li>
+        <li><a href="admin-catalogo.html" class="active">Catálogo</a></li>
+        <li><a href="admin-clientes.html">Clientes</a></li>
+        <li><a href="admin-agregar.html">Agregar producto</a></li>
+      </ul>
+    </nav>
+    <main class="main-content" style="flex:1;">
+      <h2 style="display:flex;align-items:center;justify-content:space-between;">
+        Catálogo de Productos
+      </h2>
+      <div class="input-group">
+        <label for="proveedorFiltro"><strong>Proveedores:</strong></label>
+        <select id="proveedorFiltro">
+          <option value="">Todos</option>
+        </select>
+        <input type="text" id="busquedaCatalogo" placeholder="Buscar por nombre o código..." autocomplete="off" style="width:200px;">
+        <button onclick="aplicarPorcentaje()" title="Agregar o quitar % a los precios">Agregar/Quitar %</button>
+      </div>
+      <div id="catalogo-lista"></div>
+    </main>
+  </div>
+  <script>
+    // Filtros y búsqueda
+    let filtroProveedor = '';
+    let busqueda = '';
+
+    function cargarProveedoresFiltro() {
+      let sel = document.getElementById("proveedorFiltro");
+      sel.innerHTML = `<option value="">Todos</option>`;
+      (window.proveedoresMK || []).forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>` });
+    }
+    document.getElementById('proveedorFiltro').onchange = function() {
+      filtroProveedor = this.value;
+      renderizarCatalogo();
+    };
+    document.getElementById('busquedaCatalogo').oninput = function() {
+      busqueda = this.value.toLowerCase();
+      renderizarCatalogo();
+    };
+
+    function renderizarCatalogo() {
+      let productos = window.catalogoProductos || [];
+      let lista = productos;
+      // Filtrar proveedor
+      if (filtroProveedor)
+        lista = lista.filter(p => (p.proveedor||"").toLowerCase() === filtroProveedor.toLowerCase());
+      // Filtrar búsqueda
+      if (busqueda)
+        lista = lista.filter(p =>
+          (p.nombre && p.nombre.toLowerCase().includes(busqueda)) ||
+          (p.codigo && p.codigo.toLowerCase().includes(busqueda)) ||
+          (p.codigo_producto && p.codigo_producto.toLowerCase().includes(busqueda))
+        );
+      let html = '';
+      if (lista.length === 0) {
+        html = "<div style='padding:1.2rem;color:#a00;'>Sin productos que coincidan.</div>";
+      } else {
+        html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Proveedor</th>
+              <th>Marca</th>
+              <th>Código</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+          ${lista.map((prod,idx) => `
+            <tr>
+              <td>${prod.img ? `<img src="${prod.img}">` : ''}</td>
+              <td>${prod.nombre||''}</td>
+              <td>${prod.categoria||''}</td>
+              <td>${prod.proveedor||''}</td>
+              <td>${prod.marca||''}</td>
+              <td>${prod.codigo||prod.codigo_producto||''}</td>
+              <td>${prod.moneda=="usd"?"U$S":"$ARG"} ${prod.precio}</td>
+              <td>
+                <span class="stock-${prod.stock||'poco'}">${prod.stock||''}</span>
+              </td>
+              <td>
+                <button onclick="eliminarProducto('${prod.codigo||prod.codigo_producto}')" class="btn-mini" style="background:#e74c3c;color:#fff;">Eliminar</button>
+              </td>
+            </tr>
+          `).join('')}
+          </tbody>
+        </table>
+        `;
+      }
+      document.getElementById('catalogo-lista').innerHTML = html;
+    }
+
+    // Eliminar producto
+    function eliminarProducto(codigo) {
+      if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+      window.catalogoProductos = (window.catalogoProductos||[]).filter(
+        p => (p.codigo||p.codigo_producto) !== codigo
+      );
+      descargarArchivoJS('catalogo_productos.js', 'catalogoProductos', window.catalogoProductos);
+      renderizarCatalogo();
+    }
+
+    // Sumar/restar porcentaje
+    function aplicarPorcentaje() {
+      let str = prompt("Ingresá el porcentaje (+ para sumar, - para restar)\nEjemplo: 10 para +10%, -5 para -5%");
+      if (!str) return;
+      let pct = parseFloat(str.replace('%','').trim());
+      if (isNaN(pct)) { alert("Porcentaje inválido"); return; }
+      let prods = window.catalogoProductos || [];
+      // Filtrado actual:
+      let filtrar = prods;
+      if (filtroProveedor) filtrar = filtrar.filter(p => (p.proveedor||"").toLowerCase() === filtroProveedor.toLowerCase());
+      if (busqueda) filtrar = filtrar.filter(p =>
+        (p.nombre && p.nombre.toLowerCase().includes(busqueda)) ||
+        (p.codigo && p.codigo.toLowerCase().includes(busqueda)) ||
+        (p.codigo_producto && p.codigo_producto.toLowerCase().includes(busqueda))
+      );
+      if (filtrar.length === 0) { alert("No hay productos visibles para actualizar"); return; }
+      let codigos = filtrar.map(p=>(p.codigo||p.codigo_producto));
+      let afectados = 0;
+      prods.forEach(p => {
+        if (codigos.includes(p.codigo||p.codigo_producto)) {
+          let precio = parseFloat(p.precio);
+          let nuevo = precio + (precio * pct / 100);
+          p.precio = nuevo.toFixed(2);
+          afectados++;
+        }
+      });
+      descargarArchivoJS('catalogo_productos.js', 'catalogoProductos', prods);
+      renderizarCatalogo();
+      alert(`Se actualizaron ${afectados} productos.`);
+    }
+
+    // Descargar archivo actualizado
+    function descargarArchivoJS(nombreArchivo, nombreConst, arr) {
+      let txt = `const ${nombreConst} = ${JSON.stringify(arr, null, 2)};`;
+      let blob = new Blob([txt], { type: 'application/javascript' });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{document.body.removeChild(a); URL.revokeObjectURL(url);},500);
+    }
+
+    // INIT
+    window.addEventListener('DOMContentLoaded',()=>{
+      cargarProveedoresFiltro();
+      renderizarCatalogo();
+    });
+  </script>
+</body>
+</html>

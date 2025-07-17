@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clientes | MK Motos</title>
+  <link rel="stylesheet" href="estilos/estilos.css">
+  <style>
+    .main-content { padding:2.5rem 2rem; }
+    .sidebar { min-height:100vh; }
+    .sidebar ul { list-style:none; padding:0; margin:0; }
+    .sidebar li, .sidebar a {
+      display: block;
+      cursor: pointer;
+      padding: 1rem 2rem;
+      color: #fff;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: background 0.2s;
+    }
+    .sidebar a.active, .sidebar li.active, .sidebar li:hover, .sidebar a:hover {
+      background: #303030;
+      color: #FFD700;
+      border-left: 4px solid #FFD700;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 1.5rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px #0001;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.7rem 1.1rem;
+      border-bottom: 1px solid #eee;
+    }
+    th { background: #ffd70022; }
+  </style>
+</head>
+<body>
+  <div style="display:flex;min-height:100vh;">
+    <nav class="sidebar" style="background:#111;">
+      <h1 style="color:#FFD700;text-align:center;margin:2rem 0;">MK Motos</h1>
+      <ul>
+        <li><a href="admin-inicio.html">Inicio</a></li>
+        <li><a href="admin-catalogo.html">Catálogo</a></li>
+        <li><a href="admin-clientes.html" class="active">Clientes</a></li>
+        <li><a href="admin-agregar.html">Agregar producto</a></li>
+      </ul>
+    </nav>
+    <main class="main-content" style="flex:1;">
+      <h2>Clientes y Proveedores</h2>
+      <p style="margin-bottom:1.4rem;color:#555;">
+        Acá podrás ver la lista de clientes y proveedores.<br>
+        <b>(En desarrollo...)</b>
+      </p>
+      <!-- Ejemplo de tabla vacía -->
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre / Razón Social</th>
+            <th>Tipo</th>
+            <th>Contacto</th>
+            <th>CUIT / DNI</th>
+            <th>Observaciones</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Ejemplo vacío -->
+          <tr>
+            <td colspan="6" style="color:#888;text-align:center;padding:2rem;">Sin registros aún</td>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Aquí después podrás agregar formularios y la lógica JS de gestión -->
+    </main>
+  </div>
+</body>
+</html>

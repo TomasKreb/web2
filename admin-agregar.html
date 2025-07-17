@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agregar Producto | MK Motos</title>
+  <link rel="stylesheet" href="estilos/estilos.css">
+  <script src="categorias.js"></script>
+  <script src="proveedores.js"></script>
+  <script src="marcas.js"></script>
+  <script src="catalogo_productos.js"></script>
+  <style>
+    .main-content { padding:2.5rem 2rem; }
+    .sidebar { min-height:100vh; }
+    .sidebar ul { list-style:none; padding:0; margin:0; }
+    .sidebar li, .sidebar a {
+      display: block;
+      cursor: pointer;
+      padding: 1rem 2rem;
+      color: #fff;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: background 0.2s;
+    }
+    .sidebar a.active, .sidebar li.active, .sidebar li:hover, .sidebar a:hover {
+      background: #303030;
+      color: #FFD700;
+      border-left: 4px solid #FFD700;
+    }
+    .form-admin { max-width: 950px; margin: auto; display: flex; flex-direction: column; gap: 1.15rem;}
+    .form-admin .campo-group { display: flex; gap: 2.5rem;}
+    .form-admin .campo { flex: 1; display: flex; flex-direction: column; gap: 0.5rem;}
+    .form-admin label { font-weight: 600; color: #222;}
+    .form-admin input[type="text"],
+    .form-admin input[type="number"],
+    .form-admin select { padding: 0.65rem; border-radius: 5px; border: 1px solid #ccc;}
+    .form-admin .btn { background: #FFD700; color: #111; border: none; border-radius: 4px; font-weight: bold; padding: 0.6rem 1.5rem; cursor: pointer;}
+    .form-admin .btn-secundario { background: #f4f4f4; color: #444; border: 1px solid #ccc;}
+    .stock-nivel-selector {
+      display: flex; gap: 1.1rem; align-items: center; margin-top:7px;
+    }
+    .stock-nivel-selector input[type="radio"] { display:none; }
+    .stock-nivel-selector label.barra {
+      width: 40px; height: 22px; border-radius: 8px; display: inline-block; cursor: pointer; border:2.2px solid #ddd;
+      transition: border-color .2s, box-shadow .2s;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .barra-roja   { background: #d9534f; }
+    .barra-naranja{ background: #ffb347; }
+    .barra-verde  { background: #8fc869; }
+    .stock-nivel-selector input[type="radio"]:checked + label {
+      border: 2.2px solid #222;
+      box-shadow: 0 4px 12px #2223;
+    }
+  </style>
+</head>
+<body>
+  <div style="display:flex;min-height:100vh;">
+    <nav class="sidebar" style="background:#111;">
+      <h1 style="color:#FFD700;text-align:center;margin:2rem 0;">MK Motos</h1>
+      <ul>
+        <li><a href="admin-inicio.html">Inicio</a></li>
+        <li><a href="admin-catalogo.html">Catálogo</a></li>
+        <li><a href="admin-clientes.html">Clientes</a></li>
+        <li><a href="admin-agregar.html" class="active">Agregar producto</a></li>
+      </ul>
+    </nav>
+    <main class="main-content" style="flex:1;">
+      <h2>Agregar producto</h2>
+      <form id="form-agregar-producto" class="form-admin" autocomplete="off">
+        <!-- Imagen del producto -->
+        <div class="campo">
+          <label>Imagen del producto</label>
+          <input type="file" id="img-producto" name="imagen" accept="image/*">
+          <img id="preview-img" src="" alt="" style="display:none;max-width:80px;margin-top:5px;border-radius:6px;">
+        </div>
+        <!-- Categoría, Proveedor y Marca -->
+        <div class="campo-group">
+          <div class="campo">
+            <label>Categoría</label>
+            <div style="display: flex; gap: .5rem;">
+              <select name="categoria" id="categoria-select" required></select>
+              <button type="button" id="agregar-categoria" style="padding:0 .6rem;font-size:1.1rem;">+</button>
+            </div>
+          </div>
+          <div class="campo">
+            <label>Proveedor</label>
+            <div style="display: flex; gap: .5rem;">
+              <select name="proveedor" id="proveedor-select" required></select>
+              <button type="button" id="agregar-proveedor" style="padding:0 .6rem;font-size:1.1rem;">+</button>
+            </div>
+          </div>
+          <div class="campo">
+            <label>Marca</label>
+            <div style="display: flex; gap: .5rem;">
+              <select name="marca" id="marca-select" required></select>
+              <button type="button" id="agregar-marca" style="padding:0 .6rem;font-size:1.1rem;">+</button>
+            </div>
+          </div>
+        </div>
+        <!-- Código producto y Descripción -->
+        <div class="campo-group">
+          <div class="campo">
+            <label>Código producto</label>
+            <input type="text" name="codigo" required>
+          </div>
+          <div class="campo" style="flex:2;">
+            <label>Descripción</label>
+            <input type="text" name="nombre" required>
+          </div>
+        </div>
+        <!-- Moneda y Precio -->
+        <div class="campo-group">
+          <div class="campo">
+            <label>Moneda</label>
+            <select name="moneda" required>
+              <option value="">Seleccionar...</option>
+              <option value="ars">ARG$</option>
+              <option value="usd">US$</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Precio</label>
+            <input type="number" name="precio" min="0" step="0.01" required>
+          </div>
+          <div class="campo">
+            <label>Precio mayorista (opcional)</label>
+            <input type="number" name="precio_mayorista" min="0" step="0.01">
+          </div>
+        </div>
+        <!-- Stock simplificado -->
+        <div class="campo">
+          <label>Stock</label>
+          <div class="stock-nivel-selector">
+            <input type="radio" name="stock" id="stock-poco" value="poco" required>
+            <label for="stock-poco" class="barra barra-roja" title="Poco stock"></label>
+            <input type="radio" name="stock" id="stock-medio" value="medio" required>
+            <label for="stock-medio" class="barra barra-naranja" title="Stock medio"></label>
+            <input type="radio" name="stock" id="stock-mucho" value="mucho" required>
+            <label for="stock-mucho" class="barra barra-verde" title="Mucho stock"></label>
+          </div>
+          <div class="stock-nivel-texto" id="stock-nivel-texto" style="margin-top:7px; color:#555;font-size:1rem;">
+            Seleccioná el nivel de stock
+          </div>
+        </div>
+        <!-- Stock mínimo y máxima por pedido -->
+        <div class="campo-group">
+          <div class="campo">
+            <label>Stock mínimo de compra</label>
+            <input type="number" name="stock_minimo" min="0" max="9999">
+          </div>
+          <div class="campo">
+            <label>Cantidad máxima por pedido</label>
+            <input type="number" name="cantidad_maxima" min="0" max="9999">
+          </div>
+        </div>
+        <!-- Observación -->
+        <div class="campo">
+          <label>Observación</label>
+          <input type="text" name="observacion">
+        </div>
+        <!-- Botones -->
+        <div class="campo-group" style="justify-content: flex-end;gap:1.5rem;margin-top:1.2rem;">
+          <button type="reset" class="btn btn-secundario" onclick="cancelarAgregarProducto()">Limpiar</button>
+          <button type="submit" class="btn">Guardar</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <script>
+    // ----------- Cargar listas desde archivos JS ----------- //
+    function cargarCategorias() {
+      const select = document.getElementById('categoria-select');
+      select.innerHTML = '<option value="">Seleccionar...</option>';
+      (window.categoriasMK || []).forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+    }
+    function cargarProveedores() {
+      const select = document.getElementById('proveedor-select');
+      select.innerHTML = '<option value="">Seleccionar...</option>';
+      (window.proveedoresMK || []).forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+    }
+    function cargarMarcas() {
+      const select = document.getElementById('marca-select');
+      select.innerHTML = '<option value="">Seleccionar...</option>';
+      (window.marcasMK || []).forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+    }
+
+    // ----- Cargar las listas sólo cuando TODO está listo -----
+    document.addEventListener("DOMContentLoaded", function() {
+      cargarCategorias();
+      cargarProveedores();
+      cargarMarcas();
+    });
+
+    // ----------- Agregar y guardar en archivo JS ----------- //
+    document.getElementById('agregar-categoria').onclick = function() {
+      let nueva = prompt("Nueva categoría:");
+      if (!nueva) return;
+      nueva = nueva.trim();
+      if (!nueva) return;
+      let cats = window.categoriasMK || [];
+      if (cats.includes(nueva)) {
+        alert("¡La categoría ya existe!");
+        return;
+      }
+      cats.push(nueva);
+      descargarArchivoJS('categorias.js', 'categoriasMK', cats);
+      window.categoriasMK = cats;
+      cargarCategorias();
+      document.getElementById('categoria-select').value = nueva;
+    };
+
+    document.getElementById('agregar-proveedor').onclick = function() {
+      let nueva = prompt("Nuevo proveedor:");
+      if (!nueva) return;
+      nueva = nueva.trim();
+      if (!nueva) return;
+      let provs = window.proveedoresMK || [];
+      if (provs.includes(nueva)) {
+        alert("¡El proveedor ya existe!");
+        return;
+      }
+      provs.push(nueva);
+      descargarArchivoJS('proveedores.js', 'proveedoresMK', provs);
+      window.proveedoresMK = provs;
+      cargarProveedores();
+      document.getElementById('proveedor-select').value = nueva;
+    };
+
+    document.getElementById('agregar-marca').onclick = function() {
+      let nueva = prompt("Nueva marca:");
+      if (!nueva) return;
+      nueva = nueva.trim();
+      if (!nueva) return;
+      let marcas = window.marcasMK || [];
+      if (marcas.includes(nueva)) {
+        alert("¡La marca ya existe!");
+        return;
+      }
+      marcas.push(nueva);
+      descargarArchivoJS('marcas.js', 'marcasMK', marcas);
+      window.marcasMK = marcas;
+      cargarMarcas();
+      document.getElementById('marca-select').value = nueva;
+    };
+
+    // ----------- Función para descargar archivos JS ----------- //
+    function descargarArchivoJS(nombreArchivo, nombreConstante, array) {
+      const contenido = `const ${nombreConstante} = ${JSON.stringify(array, null, 2)};`;
+      const blob = new Blob([contenido], { type: 'text/javascript' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = nombreArchivo;
+      a.click();
+    }
+
+    // Stock nivel selector (texto descriptivo)
+    const radios = document.querySelectorAll('input[name="stock"]');
+    radios.forEach(radio=>{
+      radio.addEventListener('change',()=>{
+        const val = document.querySelector('input[name="stock"]:checked').value;
+        let txt = "Seleccioná el nivel de stock";
+        if(val==="poco") txt = "Poco stock (rojo)";
+        if(val==="medio") txt = "Stock medio (naranja)";
+        if(val==="mucho") txt = "Mucho stock (verde)";
+        document.getElementById("stock-nivel-texto").textContent = txt;
+      });
+    });
+
+    // Imagen preview
+    document.getElementById("img-producto").addEventListener("change", function(e){
+      const file = e.target.files[0];
+      const preview = document.getElementById("preview-img");
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(ev){
+          preview.src = ev.target.result;
+          preview.style.display = "block";
+        }
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = "";
+        preview.style.display = "none";
+      }
+    });
+
+    function cancelarAgregarProducto(){
+      document.getElementById("form-agregar-producto").reset();
+      document.getElementById("preview-img").style.display="none";
+      document.getElementById("stock-nivel-texto").textContent = "Seleccioná el nivel de stock";
+    }
+
+    // ----------- Agregar producto ----------- //
+    document.getElementById("form-agregar-producto").addEventListener("submit", function(e){
+      e.preventDefault();
+      const form = e.target;
+      const requeridos = form.querySelectorAll("[required]");
+      let vacio = false;
+      requeridos.forEach(f=>{
+        if(!f.value) {
+          f.style.border="2px solid #e24c28";
+          vacio = true;
+        } else {
+          f.style.border="";
+        }
+      });
+      if(vacio) {
+        alert("Por favor completá todos los campos obligatorios.");
+        return;
+      }
+      const datos = {};
+      Array.from(form.elements).forEach(el=>{
+        if(el.name) datos[el.name]=el.type==="checkbox"?el.checked:el.value;
+      });
+      const imgPreview = document.getElementById("preview-img");
+      datos.img = imgPreview.src && imgPreview.style.display!=="none" ? imgPreview.src : "";
+      // Datos que necesita el catalogo
+      const prod = {
+        nombre: datos.nombre,
+        categoria: datos.categoria,
+        proveedor: datos.proveedor,
+        marca: datos.marca,
+        codigo: datos.codigo,
+        precio: datos.precio,
+        moneda: datos.moneda,
+        precio_mayorista: datos.precio_mayorista || "",
+        stock: datos.stock,
+        img: datos.img,
+        stock_minimo: datos.stock_minimo || "",
+        cantidad_maxima: datos.cantidad_maxima || "",
+        observacion: datos.observacion || ""
+      };
+      window.catalogoProductos = window.catalogoProductos || [];
+      // No duplicar códigos
+      if (window.catalogoProductos.some(p => p.codigo === prod.codigo)) {
+        alert("Ya existe un producto con ese código.");
+        return;
+      }
+      window.catalogoProductos.push(prod);
+      descargarArchivoJS('catalogo_productos.js', 'catalogoProductos', window.catalogoProductos);
+      form.reset();
+      imgPreview.style.display="none";
+      document.getElementById("stock-nivel-texto").textContent = "Seleccioná el nivel de stock";
+      alert("¡Producto guardado y archivo actualizado!");
+    });
+  </script>
+</body>
+</html>

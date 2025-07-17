@@ -1,0 +1,3 @@
+const marcasMK = [
+  "plastica VC"
+];

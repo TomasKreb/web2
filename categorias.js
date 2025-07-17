@@ -1,0 +1,4 @@
+const categoriasMK = [
+  "ruedas",
+  "cascos"
+];

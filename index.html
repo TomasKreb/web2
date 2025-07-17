@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio Admin | MK Motos</title>
+  <link rel="stylesheet" href="estilos/estilos.css">
+  <script src="categorias.js"></script>
+  <script src="proveedores.js"></script>
+  <script src="marcas.js"></script>
+  <script src="catalogo_productos.js"></script>
+  <style>
+    .main-content { padding:2.5rem 2rem; }
+    .sidebar { min-height:100vh; }
+    .sidebar ul { list-style:none; padding:0; margin:0; }
+    .sidebar li, .sidebar a {
+      display: block;
+      cursor: pointer;
+      padding: 1rem 2rem;
+      color: #fff;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: background 0.2s;
+    }
+    .sidebar a.active, .sidebar li.active, .sidebar li:hover, .sidebar a:hover {
+      background: #303030;
+      color: #FFD700;
+      border-left: 4px solid #FFD700;
+    }
+    .btn { background:#FFD700; color:#111; border:none; border-radius:4px; font-weight:bold; padding:0.6rem 1.5rem; cursor:pointer; }
+    .btn + .btn { margin-left: 1rem; }
+    /* Tarjetas últimos productos */
+    .ultimos-productos { margin-top: 1.5rem; }
+    .ultimos-productos .producto-card {
+      display:inline-block; border:1px solid #eee; background:#fff;
+      border-radius:8px; margin:.6rem; padding:.8rem; min-width:120px; max-width:160px;
+      vertical-align:top; text-align:center; box-shadow:0 2px 10px #0001;
+    }
+    .ultimos-productos .producto-card img { max-width:60px; border-radius:6px; }
+    .ultimos-productos .producto-card .precio { color:#FFD700;font-weight:bold;}
+    .ultimos-productos .producto-card small { color:#777;}
+  </style>
+</head>
+<body>
+  <div style="display:flex;min-height:100vh;">
+    <nav class="sidebar" style="background:#111;">
+      <h1 style="color:#FFD700;text-align:center;margin:2rem 0;">MK Motos</h1>
+      <ul>
+        <li><a href="admin-inicio.html" class="active">Inicio</a></li>
+        <li><a href="admin-catalogo.html">Catálogo</a></li>
+        <li><a href="admin-clientes.html">Clientes</a></li>
+        <li><a href="admin-agregar.html">Agregar producto</a></li>
+      </ul>
+    </nav>
+    <main class="main-content" style="flex:1;">
+      <h2>Bienvenido, Marcelo</h2>
+      <p>¿Qué quieres hacer?</p>
+      <div style="margin:1.7rem 0;">
+        <a href="admin-agregar.html" class="btn">Agregar producto</a>
+        <a href="admin-clientes.html" class="btn">Ver clientes</a>
+      </div>
+      <h3>Últimos productos cargados</h3>
+      <div class="ultimos-productos" id="ultimos-productos"></div>
+    </main>
+  </div>
+  <script>
+    // Muestra los últimos 5 productos del catálogo
+    function renderUltimos(){
+      const ultimosDiv = document.getElementById('ultimos-productos');
+      let productos = (window.catalogoProductos || []).slice(-5).reverse();
+      if(!productos.length) {
+        ultimosDiv.innerHTML = "<em>No hay productos cargados aún.</em>";
+        return;
+      }
+      ultimosDiv.innerHTML = productos.map(prod=>{
+        let color = "#aaa";
+        if(prod.stock==="poco") color="#d9534f";
+        if(prod.stock==="medio") color="#ffb347";
+        if(prod.stock==="mucho") color="#8fc869";
+        return `
+          <div class="producto-card">
+            ${prod.img ? `<img src="${prod.img}"><br>` : ''}
+            <b style="color:#333;">${prod.nombre||'-'}</b><br>
+            <small>${prod.codigo||prod.codigo_producto||''}</small><br>
+            <span class="precio">${prod.moneda=="usd"?"U$S":"$ARG"} ${prod.precio}</span>
+          </div>
+        `;
+      }).join('');
+    }
+    renderUltimos();
+  </script>
+</body>
+</html>
